@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./Search.module.css";
 import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
-import useAutocomplete from "@mui/base/useAutocomplete";
-// import { styled } from "@mui/system";
-// import { truncate } from "../../helpers/helpers";
-// import { useNavigate } from "react-router-dom";
-import { Tooltip } from "@mui/material";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField"; // Required for the input field
+import { styled } from "@mui/system";
+import { useNavigate } from "react-router-dom";
 
 const Listbox = styled("ul")(({ theme }) => ({
   width: "100%",
@@ -37,26 +36,15 @@ const Listbox = styled("ul")(({ theme }) => ({
 }));
 
 function Search({ searchData, placeholder }) {
-  const {
-    getRootProps,
-    getInputLabelProps,
-    value,
-    getInputProps,
-    getListboxProps,
-    getOptionProps,
-    groupedOptions,
-  } = useAutocomplete({
-    id: "use-autocomplete-demo",
-    options: searchData || [],
-    getOptionLabel: (option) => option.title,
-  });
-
+  const [value, setValue] = useState(null);
   const navigate = useNavigate();
-  const onSubmit = (e, value) => {
+
+  const onSubmit = (e) => {
     e.preventDefault();
-    console.log(value);
-    navigate(`/album/${value.slug}`);
-    //Process form data, call API, set state etc.
+    if (value) {
+      console.log(value);
+      navigate(`/album/${value.slug}`);
+    }
   };
 
   return (
@@ -64,50 +52,38 @@ function Search({ searchData, placeholder }) {
       <form
         className={styles.wrapper}
         onSubmit={(e) => {
-          onSubmit(e, value);
+          onSubmit(e);
         }}
       >
-        <div {...getRootProps()}>
-          <input
-            name="album"
-            className={styles.search}
-            placeholder={placeholder}
-            required
-            {...getInputProps()}
-          />
-        </div>
+        <Autocomplete
+          options={searchData || []}
+          getOptionLabel={(option) => option.title}
+          onChange={(event, newValue) => setValue(newValue)}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder={placeholder}
+              required
+              className={styles.search}
+              sx={{
+                "& .MuiInputBase-root": {
+                  height: "48px", // Match button height
+                  width: "800px", // Adjust width as needed
+                  backgroundColor: "white", // Set background to white
+                  borderRadius: "8px 0px 0px 8px", // Set specific corner radii
+                  border:"1px solid black",
+                },
+              }}
+            />
+          )}
+          ListboxComponent={(props) => <Listbox {...props} />}
+        />
         <div>
           <button className={styles.searchButton} type="submit">
             <SearchIcon />
           </button>
         </div>
       </form>
-      {groupedOptions.length > 0 ? (
-        <Listbox {...getListboxProps()}>
-          {groupedOptions.map((option, index) => {
-            // console.log(option);
-            const artists = option.songs.reduce((accumulator, currentValue) => {
-              accumulator.push(...currentValue.artists);
-              return accumulator;
-            }, []);
-
-            return (
-              <li
-                className={styles.listElement}
-                {...getOptionProps({ option, index })}
-              >
-                <div>
-                  <p className={styles.albumTitle}>{option.title}</p>
-
-                  <p className={styles.albumArtists}>
-                    {truncate(artists.join(", "), 40)}
-                  </p>
-                </div>
-              </li>
-            );
-          })}
-        </Listbox>
-      ) : null}
     </div>
   );
 }
