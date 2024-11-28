@@ -9,9 +9,13 @@
   color: var(--text-color);
   border: none;
   border-radius: 8px; /* Add border radius */
-  padding: 10px 20px;
+  padding: 10px 15px;
   cursor: pointer; /* Pointer on hover */
-  transition: background-color 0.3s ease;
+  /* transition: background-color 0.3s ease; */
+  height: 50px;
+  width: 10rem;
+  font-size: large;
+  font-weight: 700;
 }
 
 .button:hover {
